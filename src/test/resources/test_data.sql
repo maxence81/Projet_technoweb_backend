@@ -37,3 +37,19 @@ INSERT INTO Ligne(commande_numero, medicament_reference, quantite) VALUES ( 9999
 INSERT INTO Commande(numero, dispensaire_code, saisiele, envoyeele, port, destinataire, adresse, ville, region, code_postal, pays, remise) VALUES
     ( 99998, '2COM', '1994-11-29', NULL, 831.00, 'Bon app''', '12, rue des Bouchers', 'Marseille', NULL, '13008', 'France', 0.00);
 INSERT INTO Ligne(commande_numero, medicament_reference, quantite) VALUES ( 99998, 98, 16);
+
+-- Fournisseurs
+INSERT INTO Fournisseur(id, nom, adresse_electronique) VALUES
+    ( 1, 'PharmaDistrib',   'maxence.dabrowski81+pharmadistrib@gmail.com'),
+    ( 2, 'MediFrance',      'maxence.dabrowski81+medifrance@gmail.com'),
+    ( 3, 'SantéPlus',       'maxence.dabrowski81+santeplus@gmail.com'),
+    ( 4, 'BioMedic',        'maxence.dabrowski81+biomedic@gmail.com');
+
+-- Associations Fournisseur <-> Catégorie (chaque catégorie a au moins 2 fournisseurs)
+INSERT INTO Fournisseur_Categorie(fournisseur_id, categorie_code) VALUES
+    ( 1, 98 ),  -- PharmaDistrib fournit la catégorie 7meds
+    ( 2, 98 ),  -- MediFrance fournit la catégorie 7meds
+    ( 3, 98 ),  -- SantéPlus fournit la catégorie 7meds
+    ( 1, 99 ),  -- PharmaDistrib fournit aussi la catégorie 0prod
+    ( 4, 99 );  -- BioMedic fournit la catégorie 0prod
+

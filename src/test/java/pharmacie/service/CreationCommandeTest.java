@@ -3,6 +3,8 @@ package pharmacie.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import pharmacie.dao.DispensaireRepository;
 
@@ -12,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
- // Ce test est basé sur le jeu de données dans "test_data.sql"
+// Ce test est basé sur le jeu de données dans "test_data.sql"
 class CreationCommandeTest {
     private static final String ID_PETIT_CLIENT = "0COM";
     private static final String ID_GROS_CLIENT = "2COM";
@@ -22,13 +24,15 @@ class CreationCommandeTest {
     private CommandeService service;
     @Autowired
     private DispensaireRepository daoClient;
+    @MockitoBean
+    private JavaMailSender mailSender;
 
     @Test
     void testCreerCommandePourGrosClient() {
         var commande = service.creerCommande(ID_GROS_CLIENT);
         assertNotNull(commande.getNumero(), "On doit avoir la clé de la commande");
         assertEquals(REMISE_POUR_GROS_CLIENT, commande.getRemise(),
-            "Une remise de 15% doit être appliquée pour les gros clients");
+                "Une remise de 15% doit être appliquée pour les gros clients");
     }
 
     @Test
@@ -36,7 +40,7 @@ class CreationCommandeTest {
         var commande = service.creerCommande(ID_PETIT_CLIENT);
         assertNotNull(commande.getNumero());
         assertEquals(BigDecimal.ZERO, commande.getRemise(),
-            "Aucune remise ne doit être appliquée pour les petits clients");
+                "Aucune remise ne doit être appliquée pour les petits clients");
     }
 
     @Test
@@ -44,6 +48,6 @@ class CreationCommandeTest {
         var commande = service.creerCommande(ID_PETIT_CLIENT);
         var client = daoClient.findById(ID_PETIT_CLIENT).orElseThrow();
         assertEquals(client.getAdresse(), commande.getAdresseLivraison(),
-            "On doit recopier l'adresse du client dans l'adresse de livraison");
+                "On doit recopier l'adresse du client dans l'adresse de livraison");
     }
 }
