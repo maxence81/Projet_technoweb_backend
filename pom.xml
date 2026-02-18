@@ -141,6 +141,11 @@
             <artifactId>guava</artifactId>
             <version>33.4.8-jre</version> <!-- Use the latest version available -->
         </dependency>
+        <dependency>
+            <groupId>com.mashape.unirest</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>1.4.9</version>
+        </dependency>
     </dependencies>
 
     <build>

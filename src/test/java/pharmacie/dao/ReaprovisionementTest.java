@@ -2,6 +2,7 @@ package pharmacie.dao;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import pharmacie.entity.Categorie;
 import pharmacie.entity.Fournisseur;
 import pharmacie.entity.Medicament;
 import pharmacie.service.ReapprovisionnementService;
+import pharmacie.service.MailService;
 
 @SpringBootTest
 @Transactional
@@ -32,8 +34,8 @@ public class ReaprovisionementTest {
         @Autowired
         private ReapprovisionnementService reapprovisionnementService;
 
-        @Autowired
-        private JavaMailSender mailSender;
+        @MockitoBean
+        private MailService mailService;
 
         @Test
         void testAReaprovisionner() {
@@ -117,36 +119,22 @@ public class ReaprovisionementTest {
         }
 
         @Test
-        void testEnvoiMail() throws Exception {
-                // Utiliser les données existantes de test_data.sql
-                // Le médicament 93 (catégorie 98) a stock=100, seuil=10 => PAS à
-                // réapprovisionner
-                // On le modifie pour qu'il soit à réapprovisionner
-                Medicament m = medicamentRepository.findById(93).orElseThrow();
-                m.setUnitesEnStock(5); // Passe en dessous du seuil de 10
-                medicamentRepository.saveAndFlush(m);
+        void testEnvoiMail() {
+                // GIVEN
+                // On s'assure que le médicament 1 est à réapprovisionner (stock 5 <= seuil 10)
+                Medicament med = medicamentRepository.findById(1).orElseThrow();
+                med.setUnitesEnStock(5);
+                medicamentRepository.save(med);
 
-                // Appeler le service de réapprovisionnement
-                // Cela va VRAIMENT envoyer les mails en utilisant la configuration SMTP
+                // WHEN
                 List<String> resultats = reapprovisionnementService.demanderDevis();
 
-                // Vérifier qu'au moins un mail a été envoyé
-                assertFalse(resultats.isEmpty(), "Il doit y avoir au moins un résultat");
+                // THEN
+                assertThat(resultats).hasSize(2);
+                assertThat(resultats.get(0)).contains("Mail envoyé à");
 
-                // On vérifie que les résultats contiennent les confirmations d'envoi
-                // Le médicament 93 est dans la catégorie 98
-                // Les fournisseurs de la catégorie 98 sont PharmaDistrib, MediFrance, SantéPlus
-
-                boolean mailPharmaDistrib = resultats.stream()
-                                .anyMatch(s -> s.contains("maxence.dabrowski81+pharmadistrib@gmail.com"));
-                boolean mailMediFrance = resultats.stream()
-                                .anyMatch(s -> s.contains("maxence.dabrowski81+medifrance@gmail.com"));
-                boolean mailSantePlus = resultats.stream()
-                                .anyMatch(s -> s.contains("maxence.dabrowski81+santeplus@gmail.com"));
-
-                assertTrue(mailPharmaDistrib, "Un mail doit avoir été envoyé à PharmaDistrib");
-                assertTrue(mailMediFrance, "Un mail doit avoir été envoyé à MediFrance");
-                assertTrue(mailSantePlus, "Un mail doit avoir été envoyé à SantéPlus");
+                // On vérifie que le mock a été appelé 2 fois (pour les 2 fournisseurs)
+                verify(mailService, times(2)).envoyerMail(anyString(), anyString(), anyString());
         }
 
 }

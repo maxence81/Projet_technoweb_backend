@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +21,14 @@ public class ReapprovisionnementService {
 
     private final MedicamentRepository medicamentDao;
     private final FournisseurRepository fournisseurDao;
-    private final JavaMailSender mailSender;
+    private final MailService mailService;
 
     public ReapprovisionnementService(MedicamentRepository medicamentDao,
             FournisseurRepository fournisseurDao,
-            JavaMailSender mailSender) {
+            MailService mailService) {
         this.medicamentDao = medicamentDao;
         this.fournisseurDao = fournisseurDao;
-        this.mailSender = mailSender;
+        this.mailService = mailService;
     }
 
     /**
@@ -120,13 +118,10 @@ public class ReapprovisionnementService {
     }
 
     /**
-     * Envoie un mail à un fournisseur.
+     * Envoie un mail à un fournisseur via MailService.
      */
     private void envoyerMail(Fournisseur fournisseur, String contenu) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(fournisseur.getAdresseElectronique());
-        message.setSubject("Demande de devis de réapprovisionnement");
-        message.setText(contenu);
-        mailSender.send(message);
+        mailService.envoyerMail(fournisseur.getAdresseElectronique(), "Demande de devis de réapprovisionnement",
+                contenu);
     }
 }
