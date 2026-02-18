@@ -182,15 +182,47 @@ INSERT INTO LIGNE (COMMANDE_NUMERO, MEDICAMENT_REFERENCE, QUANTITE) VALUES
 (7, 7, 80), (7, 17, 50), (7, 27, 95), (7, 37, 55), (7, 100, 45),
 (8, 8, 100), (8, 18, 75), (8, 28, 80), (8, 38, 70), (8, 48, 60);
 
--- AJOUT POUR TEST RÉAPPROVISIONNEMENT
--- 1. Un fournisseur de test avec l'adresse mail de l'utilisateur (ou une adresse de test)
+-- =============================================================
+-- FOURNISSEURS
+-- 5 fournisseurs avec adresses Gmail aliases
+-- =============================================================
 INSERT INTO FOURNISSEUR (ID, NOM, ADRESSE_ELECTRONIQUE) VALUES
-(1, 'Fournisseur Test (M. Dabrowski)', 'maxence.dabrowski81+fournisseurtest@gmail.com');
+(1, 'PharmaDistrib',   'maxence.dabrowski81+pharmadistrib@gmail.com'),
+(2, 'MediFrance',      'maxence.dabrowski81+medifrance@gmail.com'),
+(3, 'SantéPlus',       'maxence.dabrowski81+santeplus@gmail.com'),
+(4, 'BioMedic',        'maxence.dabrowski81+biomedic@gmail.com'),
+(5, 'EuroSanté',       'maxence.dabrowski81+eurosante@gmail.com');
+ALTER TABLE Fournisseur ALTER COLUMN id RESTART WITH 6;
 
--- 2. Ce fournisseur fournit la catégorie 1 (Antalgiques)
+-- =============================================================
+-- ASSOCIATIONS FOURNISSEUR <-> CATÉGORIE
+-- Chaque catégorie (1 à 10) est fournie par au moins 2 fournisseurs
+-- =============================================================
 INSERT INTO FOURNISSEUR_CATEGORIE (FOURNISSEUR_ID, CATEGORIE_CODE) VALUES
-(1, 1);
+-- Catégorie 1 : Antalgiques et Antipyrétiques -> PharmaDistrib, MediFrance, EuroSanté
+(1, 1), (2, 1), (5, 1),
+-- Catégorie 2 : Anti-inflammatoires -> PharmaDistrib, SantéPlus
+(1, 2), (3, 2),
+-- Catégorie 3 : Antibiotiques -> MediFrance, BioMedic, EuroSanté
+(2, 3), (4, 3), (5, 3),
+-- Catégorie 4 : Antihypertenseurs -> PharmaDistrib, SantéPlus
+(1, 4), (3, 4),
+-- Catégorie 5 : Antidiabétiques -> MediFrance, BioMedic
+(2, 5), (4, 5),
+-- Catégorie 6 : Antihistaminiques -> SantéPlus, EuroSanté
+(3, 6), (5, 6),
+-- Catégorie 7 : Vitamines et Compléments -> PharmaDistrib, BioMedic
+(1, 7), (4, 7),
+-- Catégorie 8 : Médicaments Cardiovasculaires -> MediFrance, SantéPlus
+(2, 8), (3, 8),
+-- Catégorie 9 : Médicaments Gastro-intestinaux -> PharmaDistrib, EuroSanté
+(1, 9), (5, 9),
+-- Catégorie 10 : Médicaments Respiratoires -> BioMedic, MediFrance
+(4, 10), (2, 10);
 
--- 3. Mettre un médicament de la catégorie 1 en rupture de stock (stock < niveau_reappro)
--- 'Paracétamol 500mg' (ID 1) : Stock initial 500 -> 5 (Seuil 50)
+-- =============================================================
+-- DONNÉES POUR TEST RÉAPPROVISIONNEMENT
+-- Mettre un médicament en rupture de stock (stock < niveau_reappro)
+-- 'Paracétamol 500mg' (Réf 1, Cat 1) : Stock 500 -> 5 (Seuil 50)
+-- =============================================================
 UPDATE MEDICAMENT SET UNITES_EN_STOCK = 5 WHERE REFERENCE = 1;
